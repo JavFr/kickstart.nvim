@@ -39,6 +39,8 @@ return {
     keys = {
       { "L", "<Cmd>BufferLineCycleNext<CR>", desc = "Go to next buffer" },
       { "H", "<Cmd>BufferLineCyclePrev<CR>", desc = "Go to prev buffer" },
+      { "<leader>bf", "<Cmd>BufferLinePick<CR>", desc = "Pick buffer like hop" },
+      { "<leader>bF", "<Cmd>BufferLinePickClose<CR>", desc = "Pick buffer to close" },
       { "<leader>bp", "<Cmd>BufferLineTogglePin<CR>", desc = "Toggle pin" },
       { "<leader>bP", "<Cmd>BufferLineGroupClose ungrouped<CR>", desc = "Delete non-pinned buffers" },
       { "<leader>bmn", "<Cmd>BufferLineMoveNext<CR>", desc = "Mover buffer to next position" },
