@@ -9,6 +9,25 @@ return {
     "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
     "MunifTanjim/nui.nvim",
   },
+  keys = {
+      {
+        "<leader>e",
+        function()
+          require("neo-tree.command").execute({ toggle = true })
+        end,
+        desc = "Explorer NeoTree (root dir)",
+      },
+      {
+        "<leader>E",
+        function()
+          require("neo-tree.command").execute({ toggle = true, dir = vim.loop.cwd() })
+        end,
+        desc = "Explorer NeoTree (cwd)",
+      },
+  },
+  deactivate = function()
+    vim.cmd([[Neotree close]])
+  end,
   config = function ()
     require('neo-tree').setup {}
   end,
