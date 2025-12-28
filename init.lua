@@ -224,6 +224,19 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- Disable auto-indent for text-based filetypes
+-- Keep smart indentation for code, but disable for text/markdown/journal files
+vim.api.nvim_create_autocmd('FileType', {
+  desc = 'Disable auto-indent for text-based files',
+  group = vim.api.nvim_create_augroup('custom-no-autoindent', { clear = true }),
+  pattern = { 'text', 'markdown', 'ledger', 'journal' },
+  callback = function()
+    vim.bo.autoindent = false
+    vim.bo.smartindent = false
+    vim.bo.indentexpr = ''
+  end,
+})
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -464,6 +477,40 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sn', function()
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[S]earch [N]eovim files' })
+
+      vim.keymap.set({ 'n', 'v' }, '<leader>cd', function()
+        local expression
+
+        -- Comprobamos si acabamos de salir de modo visual o estamos en él
+        local mode = vim.api.nvim_get_mode().mode
+        if mode:match '^[vV]' or mode == '\22' then -- \22 es Visual Block
+          -- Cambiamos "vy por "vd para que BORRE la selección y la guarde en v
+          vim.cmd 'normal! "vd'
+          expression = vim.fn.getreg 'v'
+        else
+          -- En modo normal usamos cWORD y luego borramos la palabra
+          expression = vim.fn.expand '<cWORD>'
+          vim.cmd 'normal! "_bcw'
+        end
+
+        -- Limpiar la expresión y asegurar que no esté vacía
+        expression = expression:gsub('\n', ''):gsub('\r', ''):gsub(' ', '')
+
+        if expression == '' then
+          return
+        end
+
+        -- Agregamos tr '.' ',' para que el resultado use coma
+        local command = 'echo "scale=2; ' .. expression .. '" | bc | tr "." ","'
+
+        local result = vim.fn.system(command):gsub('\n', '')
+
+        -- Insertamos el resultado solo (sin el " = ")
+        vim.api.nvim_put({ result }, 'c', true, true)
+
+        -- Limpiar el registro para no dejar basura
+        vim.fn.setreg('v', {})
+      end, { desc = 'B[c] [c]alculate' })
     end,
   },
 
@@ -766,18 +813,22 @@ require('lazy').setup({
           return nil
         else
           return {
-            timeout_ms = 500,
+            timeout_ms = 3000,
             lsp_format = 'fallback',
           }
         end
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        javascript = { 'prettierd', 'prettier', stop_after_first = true },
+        javascriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+        typescript = { 'prettierd', 'prettier', stop_after_first = true },
+        typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+        json = { 'prettierd', 'prettier', stop_after_first = true },
+        css = { 'prettierd', 'prettier', stop_after_first = true },
+        html = { 'prettierd', 'prettier', stop_after_first = true },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
-        --
-        -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
       },
     },
   },
@@ -892,7 +943,7 @@ require('lazy').setup({
       ---@diagnostic disable-next-line: missing-fields
       require('tokyonight').setup {
         styles = {
-          comments = { italic = false }, -- Disable italics in comments
+          comments = { italic = true }, -- Disable italics in comments
         },
       }
 
@@ -950,7 +1001,26 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = {
+        'bash',
+        'c',
+        'diff',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
+        -- TypeScript/JavaScript
+        'typescript',
+        'tsx',
+        'javascript',
+        'jsdoc',
+        'json',
+        'css',
+      },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {

@@ -6,6 +6,10 @@ return {
   {
     'lewis6991/gitsigns.nvim',
     opts = {
+      -- Forzar a que use la versión del commit para comparar
+      base = 'HEAD',
+      -- Ayuda a procesar archivos que pasan por filtros externos
+      _filter_version = 2,
       on_attach = function(bufnr)
         local gitsigns = require 'gitsigns'
 
