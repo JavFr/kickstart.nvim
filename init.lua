@@ -735,6 +735,13 @@ require('lazy').setup({
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
         --
+        -- 'postgres_' = {
+        --   filetypes = { 'sql' },
+        -- },
+        -- sqls = {
+        --   filetypes = { 'sql' },
+        --   cmd = { 'sqls' },
+        -- },
 
         lua_ls = {
           -- cmd = { ... },
@@ -768,6 +775,8 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        -- 'postgres_lsp',
+        'pgformatter',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -827,6 +836,7 @@ require('lazy').setup({
         json = { 'prettierd', 'prettier', stop_after_first = true },
         css = { 'prettierd', 'prettier', stop_after_first = true },
         html = { 'prettierd', 'prettier', stop_after_first = true },
+        sql = { 'pgformatter', 'pg_format', stop_after_first = true },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
       },
